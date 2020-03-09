@@ -390,7 +390,7 @@ def writePro(eventlist):
 
 def writePickle(trialdata):
     f = open('network.pickle', 'wb')
-    pickle.dump(trialdata, f)
+    pickle.dump(trialdata, f, protocol=2)
     f.flush()
     f.close()
 
