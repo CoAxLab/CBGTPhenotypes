@@ -1655,8 +1655,8 @@ int SimulateOneTimeStep() {
           }
           
           // disable plasticity
-          // Pop[p].Cell[i].dpmn_w += dt * (Pop[p].Cell[i].dpmn_wmax - Pop[p].Cell[i].dpmn_w)
-          //                      * Pop[p].Cell[i].dpmn_alphaw * fDA * Pop[p].Cell[i].dpmn_E;
+           Pop[p].Cell[i].dpmn_w += dt * (Pop[p].Cell[i].dpmn_wmax - Pop[p].Cell[i].dpmn_w)
+                                * Pop[p].Cell[i].dpmn_alphaw * fDA * Pop[p].Cell[i].dpmn_E;
         }
       }
     }
