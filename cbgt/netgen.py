@@ -161,7 +161,7 @@ def constructPopPaths(channel):
     return poppaths
 
 
-def constructPopCopies(dims, channel, poppaths):
+def constructPopCopies(dims, channel, poppaths, **kwargs):
     poplist = []
     for pop in channel['pops']:
         pop['path'] = poppaths[pop['name']]
@@ -174,6 +174,12 @@ def constructPopCopies(dims, channel, poppaths):
             for val in pathval:
                 popcopy['uniquename'] += '_' + str(val)
             popcopy['targets'] = []
+            
+            for key, value in kwargs.items():
+                if key == popcopy['name'] or key == popcopy['uniquename']:
+                    if isinstance(value, dict):
+                        popcopy['data'].update(value)
+            
             poplist.append(popcopy)
     for subchannel in channel['subchannels']:
         subpoplist = constructPopCopies(dims, subchannel, poppaths)
@@ -534,8 +540,8 @@ def getD1CellDefaults():
                 'dpmn_b':0.1,
                 'dpmn_c':0.05,
                 # explicit initial conditions
-                'dpmn_w':0.2*.9,
-                'dpmn_winit':0.2*.9,
+                'dpmn_w':0.1286,
+                #'dpmn_winit':0.2*.9,
                 'dpmn_ratio':1.0,
                 'dpmn_implied':1.0,
                 'dpmn_Q1':0.0,                #0.5,
@@ -570,8 +576,8 @@ def getD2CellDefaults():
                 'dpmn_b':0.005,
                 'dpmn_c':0.05,
                 # explicit initial conditions
-                'dpmn_w':0.2*.9,             #0.015,
-                'dpmn_winit':0.2*.9,
+                'dpmn_w':0.1286,             #0.015,
+                #'dpmn_winit':0.2*.9,
                 'dpmn_ratio':1.0,
                 'dpmn_implied':1.0,
                 'dpmn_Q1':0.0,                #0.5,
@@ -587,9 +593,10 @@ def getD2CellDefaults():
 
 def getConProb():
 
-    conProb = {'Cx': {'STR': .45,
-                        'FSI': 0.45,
-                        'Th': .35},
+    conProb = {'Cx': {'STRd': .45,
+                      'STRi': .45,
+                      'FSI': 0.45,
+                      'Th': .35},
                 'D1STR': {'D1STR': .135,
                           'D2STR': .135,
                           'GPi': .57},
@@ -606,7 +613,8 @@ def getConProb():
                 'STN': {'GPeP': 0.0485,
                         'GPi': 1},
                 'GPi': {'Th': 0.85},
-                'Th': {'STR': 0.45,
+                'Th': {'STRd': 0.45,
+                        'STRi': 0.45,
                         'FSI': 0.25,
                         'Cx': 0.25,
                         'CxI': 0.25}
@@ -617,7 +625,8 @@ def getConProb():
 
 def getConEff(**kwargs):
 
-    conEff = {'Cx': {'STR': [0.2, 0.2],
+    conEff = {'Cx': {'STRd': [0.2, 0.2],
+                     'STRi': [0.2, 0.2],
                     'FSI': 0.16*.5,
                     'Th': [0.0335, 0.0335]},
                 'D1STR': {'D1STR': .28,
@@ -636,7 +645,8 @@ def getConEff(**kwargs):
                 'STN': {'GPeP': [0.07, 4],
                         'GPi': 0.0324},
                 'GPi': {'Th': 0.067},
-                'Th': {'STR': 0.3,
+                'Th': {'STRd': 0.3,
+                        'STRi': 0.3,
                         'FSI': 0.3,
                         'Cx': 0.015,
                         'CxI': 0.015}
@@ -727,9 +737,10 @@ def describeBG(**kwargs):
                         [AMPA, 800, config['CxExtEff'],
                         config['CxExtFreq']], NMDA],
                         cd_pre, {'N': 680, 'dpmn_cortex': 1})
-
-    camP(c, 'LIP', 'D1STR', ['AMPA', 'NMDA'], ['syn'], conProb['Cx']['STR'], conEff['Cx']['STR'], name='cxd')
-    camP(c, 'LIP', 'D2STR',  ['AMPA', 'NMDA'], ['syn'], conProb['Cx']['STR'], conEff['Cx']['STR'], name='cxi')
+    
+    camP(c, 'LIP', 'D1STR', ['AMPA', 'NMDA'], ['syn'], conProb['Cx']['STRd'], conEff['Cx']['STRd'], name='cxd')
+    camP(c, 'LIP', 'D2STR',  ['AMPA', 'NMDA'], ['syn'], conProb['Cx']['STRi'], conEff['Cx']['STRi'], name='cxi')
+    
     camP(c, 'LIP', 'FSI', 'AMPA', ['all'], conProb['Cx']['FSI'], conEff['Cx']['FSI'], name='cxfsi')
     camP(c, 'LIP', 'Th', ['AMPA', 'NMDA'], ['all'], conProb['Cx']['Th'], conEff['Cx']['Th'])
 
@@ -813,8 +824,8 @@ def describeBG(**kwargs):
     Th = makePop('Th', [GABA,
                         [AMPA, 800, config['ThExtEff'],
                         config['ThExtFreq']], NMDA], cd_pre)
-    camP(c, 'Th', 'D1STR', 'AMPA', ['syn'], conProb['Th']['STR'], conEff['Th']['STR'])
-    camP(c, 'Th', 'D2STR', 'AMPA', ['syn'], conProb['Th']['STR'], conEff['Th']['STR'])
+    camP(c, 'Th', 'D1STR', 'AMPA', ['syn'], conProb['Th']['STRd'], conEff['Th']['STRd'])
+    camP(c, 'Th', 'D2STR', 'AMPA', ['syn'], conProb['Th']['STRi'], conEff['Th']['STRi'])
     camP(c, 'Th', 'FSI', 'AMPA', ['all'], conProb['Th']['FSI'], conEff['Th']['FSI'])
     camP(c, 'Th', 'LIP', 'NMDA', ['all'], conProb['Th']['Cx'], conEff['Th']['Cx'], name='thcx')
 
@@ -839,6 +850,11 @@ def describeBG(**kwargs):
     return (brain, c, h)
 
 
+def genDefaultRewardSchedule():
+    t1 = [1,1,1,1,0]
+    t2 = [0,0,0,0,1]
+    return (t1,t2)
+
 
 def mcInfo(**kwargs):
 
@@ -849,7 +865,12 @@ def mcInfo(**kwargs):
               'Choices': 2,
               'Dynamic': 30}
 
+    (config['t1_epochs']['r'],config['t2_epochs']['r']) = genDefaultRewardSchedule()
+
     config.update(kwargs)
+    
+    t1_epochs = config['t1_epochs']['r']	
+    t2_epochs = config['t2_epochs']['r']
 
     dims = {'brain': 1, 'choices': config['Choices']}
 
@@ -864,7 +885,7 @@ def mcInfo(**kwargs):
 
     hes = []
     houts = []
-    for i in range(0,50):
+    for i in range(0,len(t1_epochs)):
         hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim']))
         hes.append(makeHandleEvent('wrong stimulus', config['Start'], 'sensory', [], config['WrongStim']))
         hes.append(makeHandleEvent('right stimulus', config['Start'], 'sensory', [0], config['RightStim']))
@@ -872,28 +893,16 @@ def mcInfo(**kwargs):
         #hes.append(makeHandleEvent('hyperdirect', config['Start'], 'threshold', [0], config['STNExtFreq']+.75))
         #hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, 0.1)) #Right reward 0.1
         #if random.uniform(0, 1) < config['rewardprob']:
-        if i < 20:
-            if random.uniform(0, 1) < 0.5:
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, 1.0)) #Left reward 1.0
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, 0.0)) #Right reward 0.0
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
-            else:
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, 0.0)) #Right reward 0.0
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, 1.0)) #Left reward 1.0
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
+        if random.uniform(0, 1) < 0.5:
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, t1_epochs[i])) #Left reward 1.0
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, t2_epochs[i])) #Right reward 0.0
+            houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
+            houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
         else:
-            if random.uniform(0, 1) < 0.5:
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, 0.0)) #Left reward 0.0
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, 1.0)) #Right reward 1.0
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
-            else:
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, 1.0)) #Right reward 1.0
-                hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, 0.0)) #Left reward 0.0
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
-                houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, t1_epochs[i])) #Right reward 0.0
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, t2_epochs[i])) #Left reward 1.0
+            houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
+            houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
         hes.append(makeHandleEvent('time limit', config['Start']+800, etype='EndTrial'))
 
 
