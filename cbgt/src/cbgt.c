@@ -1410,11 +1410,11 @@ int SimulateOneTimeStep() {
 
         pathway_strength = Pop[p].Cell[sourceneuron].Axonals[j].Efficacy;
         if (Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 && tr == ReceptorCode("AMPA", tp)) { // Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 &&
-          pathway_strength = Pop[tp].Cell[tn].dpmn_w * Pop[tp].Cell[tn].dpmn_ratio / Pop[tp].Cell[tn].dpmn_implied;
+          pathway_strength = Pop[tp].Cell[tn].dpmn_w; // * Pop[tp].Cell[tn].dpmn_ratio / Pop[tp].Cell[tn].dpmn_implied;
         }
-        if (Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 && tr == ReceptorCode("NMDA", tp)) { // Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 &&
-          pathway_strength *= (1 - Pop[tp].Cell[tn].dpmn_ratio); // * Pop[tp].Cell[tn].dpmn_w / Pop[tp].Cell[tn].dpmn_winit
-        }
+        // if (Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 && tr == ReceptorCode("NMDA", tp)) { // Pop[p].Cell[sourceneuron].dpmn_cortex > 0 && Pop[tp].Cell[tn].dpmn_type > 0 &&
+        //  pathway_strength *= (1 - Pop[tp].Cell[tn].dpmn_ratio); // * Pop[tp].Cell[tn].dpmn_w / Pop[tp].Cell[tn].dpmn_winit
+        // }
 
         //if (tr == NMDA) { // Pop[p].Cell[sourceneuron].dpmn_cortex > 0 &&
         //  pathway_strength = 0;//Pop[tp].Cell[tn].dpmn_w;
@@ -1653,8 +1653,10 @@ int SimulateOneTimeStep() {
             } else {
             fDA = DA/(2.5+abs(DA));
           }
-          Pop[p].Cell[i].dpmn_w += dt * (Pop[p].Cell[i].dpmn_wmax - Pop[p].Cell[i].dpmn_w)
-                                * Pop[p].Cell[i].dpmn_alphaw * fDA * Pop[p].Cell[i].dpmn_E;
+          
+          // disable plasticity
+          // Pop[p].Cell[i].dpmn_w += dt * (Pop[p].Cell[i].dpmn_wmax - Pop[p].Cell[i].dpmn_w)
+          //                      * Pop[p].Cell[i].dpmn_alphaw * fDA * Pop[p].Cell[i].dpmn_E;
         }
       }
     }
