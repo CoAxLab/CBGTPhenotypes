@@ -863,7 +863,9 @@ def mcInfo(**kwargs):
               'RightStim': 2.50,
               'Start': 500,
               'Choices': 2,
-              'Dynamic': 30}
+              'Dynamic': 30,
+              't1_epochs':{'r':[]},
+              't2_epochs':{'r':[]}}
 
     (config['t1_epochs']['r'],config['t2_epochs']['r']) = genDefaultRewardSchedule()
 
