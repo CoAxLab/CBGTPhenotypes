@@ -899,8 +899,8 @@ def mcInfo(**kwargs):
             houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
             houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
         else:
-            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, t1_epochs[i])) #Right reward 0.0
-            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, t2_epochs[i])) #Left reward 1.0
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial', 2, t2_epochs[i])) #Right reward 0.0
+            hes.append(makeHandleEvent('dynamic cutoff', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial', 1, t1_epochs[i])) #Left reward 1.0
             houts.append(makeHandleEvent('decision made', config['Start'], 'out', [1], config['Dynamic'], 'EndTrial'))
             houts.append(makeHandleEvent('decision made', config['Start'], 'out', [0], config['Dynamic'], 'EndTrial'))
         hes.append(makeHandleEvent('time limit', config['Start']+800, etype='EndTrial'))
