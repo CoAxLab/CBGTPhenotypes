@@ -499,6 +499,44 @@ def compileAndRunSweepALL_NEW(trials=1, offset=0, sweepcount=1, parallel=4):
 
 
 
+def compileAndRunSweepALL_Onofre(trials=1, offset=0, sweepcount=1, parallel=4):
+    
+    if sys.platform == "linux" or sys.platform == "linux2":
+        compiler = 'gcc'
+    # number of clients for multiprocess
+    elif sys.platform == "darwin":
+        compiler = 'gcc-8'
+
+    c_dir = os.path.join(_package_dir, 'src')
+
+    for sweepnumber in range(0, sweepcount):
+        simfile = os.path.join(getDirectory(sweepnumber), 'sim')
+        call('{} -o {} cbgt.c rando2.h -lm -std=c99'.format(compiler, simfile), shell=True, cwd=c_dir)
+    
+    threadcounter = 1
+    reached_popen = False
+    for trial in range(0, trials):
+        for sweepnumber in range(0, sweepcount):
+            outdir = getDirectory(sweepnumber)
+            seed = np.random.randint(0, 1000)
+            if threadcounter % parallel == 0:
+                call('./sim -ns -n{} -s{}'.format(str(trial+offset), str(seed+trial+offset)), shell=True, cwd=outdir)
+            else:
+                out_popen = Popen('./sim -ns -n{} -s{}'.format(str(trial+offset), str(seed+trial+offset)), shell=True, cwd=outdir)
+                reached_popen = True
+            threadcounter += 1
+
+    # When all process have been called, check if all of them have finished
+    # reached_popen is to ensure that variable out_popen exists
+    if reached_popen:
+        print("Waiting for subprocess to end")
+        out_popen.wait()
+        print("Done")
+
+
+
+
+
 def getCellDefaults():
 
     return {'N': 250,
@@ -529,7 +567,7 @@ def getD1CellDefaults():
                 'dpmn_taum':0,#4000.0*5,
                 # specific to D1
                 'dpmn_type': 1,
-                'dpmn_alphaw': 55/3.0,          # 0.55
+                'dpmn_alphaw': 0, #55/3.0,          # 0.55
                 'dpmn_dPRE': 0.8,              #10,
                 'dpmn_dPOST':0.04,           #6,   0.087
                 'dpmn_tauE': 3*5,             #3*3,
@@ -565,7 +603,7 @@ def getD2CellDefaults():
                 'dpmn_taum':0,#4000.0*5,         #4000.0*5,
                 # specific to D1
                 'dpmn_type': 2,
-                'dpmn_alphaw': -45/3.0,     #-0.45
+                'dpmn_alphaw': 0, #-45/3.0,     #-0.45
                 'dpmn_dPRE': 0.8,         #10,
                 'dpmn_dPOST': 0.04,      #6
                 'dpmn_tauE':3*5,              #3*3,
@@ -851,8 +889,8 @@ def describeBG(**kwargs):
 
 
 def genDefaultRewardSchedule():
-    t1 = [1,1,1,1,0]
-    t2 = [0,0,0,0,1]
+    t1 = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    t2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     return (t1,t2)
 
 
