@@ -182,7 +182,7 @@ def constructPopCopies(dims, channel, poppaths, **kwargs):
             
             poplist.append(popcopy)
     for subchannel in channel['subchannels']:
-        subpoplist = constructPopCopies(dims, subchannel, poppaths)
+        subpoplist = constructPopCopies(dims, subchannel, poppaths, **kwargs)
         for pop in subpoplist:
             poplist.append(pop)
     return poplist
@@ -1034,7 +1034,7 @@ def configureExperiment(**kwargs):
 
     # create network populations
     poppaths = constructPopPaths(brain)
-    popcopylist = constructPopCopies(dims, brain, poppaths)
+    popcopylist = constructPopCopies(dims, brain, poppaths, **kwargs)
 
     # modify network
     modifyNetwork(popcopylist, connections, **kwargs)
