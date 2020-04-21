@@ -2468,13 +2468,13 @@ int main(int argc, char *argv[])
           rewardflag = EndingEvent.RewardFlag;
           dpmn_RewardTime = Time + 300.0;
           if (rewardflag == 1) {
-            Events[CStage][0].ETime += 300.0;
+            Events[CStage][0+2].ETime += 300.0;
             EventDescr temp;
-            temp = Events[CStage][0];
-            Events[CStage][0] = Events[CStage][1];
-            Events[CStage][1] = temp;
+            temp = Events[CStage][0+2];
+            Events[CStage][0+2] = Events[CStage][1+2];
+            Events[CStage][1+2] = temp;
           } else if (rewardflag == 2) {
-            Events[CStage][1].ETime += 300.0;
+            Events[CStage][1+2].ETime += 300.0;
           }
         }
         runflag = 1;

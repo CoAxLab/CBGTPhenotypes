@@ -647,7 +647,7 @@ def getConEff(**kwargs):
                 'GPi': {'Th': 0.067},
                 'Th': {'STRd': 0.3,
                         'STRi': 0.3,
-                        'FSI': 0.3,
+                        'FSI': 0.4,#0.3,
                         'Cx': 0.015,
                         'CxI': 0.015}
                 }
@@ -851,8 +851,8 @@ def describeBG(**kwargs):
 
 
 def genDefaultRewardSchedule():
-    t1 = [1,1,1,1,0]
-    t2 = [0,0,0,0,1]
+    t1 = [1,1]
+    t2 = [0,0]
     return (t1,t2)
 
 
@@ -888,6 +888,7 @@ def mcInfo(**kwargs):
     hes = []
     houts = []
     for i in range(0,len(t1_epochs)):
+        hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim']*.15+config['WrongStim']*.85))
         hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim']))
         hes.append(makeHandleEvent('wrong stimulus', config['Start'], 'sensory', [], config['WrongStim']))
         hes.append(makeHandleEvent('right stimulus', config['Start'], 'sensory', [0], config['RightStim']))
