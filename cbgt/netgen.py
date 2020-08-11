@@ -498,6 +498,45 @@ def compileAndRunSweepALL_NEW(trials=1, offset=0, sweepcount=1, parallel=4):
                 Popen('./sim -ns -n{} -s{}'.format(str(trial+offset), str(seed+trial+offset)), shell=True, cwd=outdir)
 
 
+def compileAndRunSweepALL_Onofre(trials=1, offset=0, sweepcount=1, parallel=4):
+    
+    if sys.platform == "linux" or sys.platform == "linux2":
+        compiler = 'gcc'
+    # number of clients for multiprocess
+    elif sys.platform == "darwin":
+        compiler = 'gcc-8'
+
+    c_dir = os.path.join(_package_dir, 'src')
+
+    for sweepnumber in range(0, sweepcount):
+        simfile = os.path.join(getDirectory(sweepnumber), 'sim')
+        call('{} -o {} cbgt.c rando2.h -lm -std=c99'.format(compiler, simfile), shell=True, cwd=c_dir)
+    
+    threadcounter = 1
+    reached_popen = False
+    for trial in range(0, trials):
+        for sweepnumber in range(0, sweepcount):
+            outdir = getDirectory(sweepnumber)
+            seed = np.random.randint(0, 1000)
+            if threadcounter % parallel == 0:
+                call('./sim -ns -n{} -s{}'.format(str(trial+offset), str(seed+trial+offset)), shell=True, cwd=outdir)
+            else:
+                out_popen = Popen('./sim -ns -n{} -s{}'.format(str(trial+offset), str(seed+trial+offset)), shell=True, cwd=outdir)
+                reached_popen = True
+            threadcounter += 1
+
+    # When all process have been called, check if all of them have finished
+    # reached_popen is to ensure that variable out_popen exists
+    if reached_popen:
+        print("Waiting for subprocess to end")
+        out_popen.wait()
+        print("Done")
+
+
+
+
+
+
 
 def getCellDefaults():
 
@@ -851,8 +890,8 @@ def describeBG(**kwargs):
 
 
 def genDefaultRewardSchedule():
-    t1 = [1,1]
-    t2 = [0,0]
+    t1 = np.ones(500)  # 50 for the boudaries, 200 for the HDDM study
+    t2 = np.zeros(500)
     return (t1,t2)
 
 
