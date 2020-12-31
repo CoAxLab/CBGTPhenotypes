@@ -53,39 +53,111 @@ def generateFrames(results,decisions):
                     row['decision'] = decisions[confignum][repnum][i]['pathvals'][0]
                 else:
                     row['decision'] = None
-                
-                row['stimulusstarttime'] = decisions[confignum][repnum][i]['time'] - decisions[confignum][repnum][i]['delay']
+                try:
+                    row['stimulusstarttime'] = decisions[confignum][repnum][i]['time'] - decisions[confignum][repnum][i]['delay']
+                except:
+                    row['stimulusstarttime'] = None
                 row['decisiontime'] = decisions[confignum][repnum][i]['time']
                 row['decisionduration'] = decisions[confignum][repnum][i]['delay']
-                row['decisiondurationplusdelay'] = decisions[confignum][repnum][i]['delay'] + 300
-                row['rewardtime'] = decisions[confignum][repnum][i]['time'] + 300
+                try:
+                    row['decisiondurationplusdelay'] = decisions[confignum][repnum][i]['delay'] + 300
+                except:
+                    row['decisiondurationplusdelay'] = None
+                try:
+                    row['rewardtime'] = decisions[confignum][repnum][i]['time'] + 300
+                except:
+                    row['rewardtime'] = None
+
                 
                 # NOTE: has to match code in netgen
                 row['correctdecision'] = int(i>=20)
                 row['reward'] = row.apply(lambda x: int(x.decision == x.correctdecision), axis=1)
                 
-                msd = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'decisiontime'])].drop(columns='Time (ms)').mean().to_frame().T
-                isd = msd.copy().multiply(row.loc[0,'decisiontime'] - row.loc[0,'stimulusstarttime']).divide(1000)
+                
+                columnsException = result['popfreqs'].drop(columns='Time (ms)').mean().to_frame().T*0
+                
+                try:
+                    msd = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'decisiontime'])].drop(columns='Time (ms)').mean().to_frame().T
+                except:
+                    msd=columnsException
+                
+                try:
+                    isd = msd.copy().multiply(row.loc[0,'decisiontime'] - row.loc[0,'stimulusstarttime']).divide(1000)
+                except:
+                    isd=columnsException
+                    
                 msd.columns = ["msd_" + str(col) for col in msd.columns]
                 row = row.join(msd)
                 isd.columns = ["isd_" + str(col) for col in isd.columns]
                 row = row.join(isd)
+
                 
                 
-                mdr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'decisiontime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').mean().to_frame().T
-                idr = mdr.copy().multiply(row.loc[0,'rewardtime'] - row.loc[0,'decisiontime']).divide(1000)
+                
+                try:
+                    mdr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'decisiontime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').mean().to_frame().T
+                except:
+                    mdr=columnsException
+                
+                try:
+                    idr = mdr.copy().multiply(row.loc[0,'rewardtime'] - row.loc[0,'decisiontime']).divide(1000)
+                except:
+                    idr=columnsException
+                    
                 mdr.columns = ["mdr_" + str(col) for col in mdr.columns]
                 row = row.join(mdr)
                 idr.columns = ["idr_" + str(col) for col in idr.columns]
                 row = row.join(idr)
                 
                 
-                msr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').mean().to_frame().T
-                isr = msr.copy().multiply(row.loc[0,'rewardtime'] - row.loc[0,'stimulusstarttime']).divide(1000)
+                
+                try:
+                    msr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').mean().to_frame().T
+                except:
+                    msr=columnsException
+                
+                try:
+                    isr = msr.copy().multiply(row.loc[0,'rewardtime'] - row.loc[0,'stimulusstarttime']).divide(1000)
+                except:
+                    isr=columnsException
+                    
                 msr.columns = ["msr_" + str(col) for col in msr.columns]
                 row = row.join(msr)
                 isr.columns = ["isr_" + str(col) for col in isr.columns]
                 row = row.join(isr)
+                
+                
+                try:
+                    maxsd = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'decisiontime'])].drop(columns='Time (ms)').max().to_frame().T
+                except:
+                    maxsd=columnsException
+                
+
+                try:
+                    minsd = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'decisiontime'])].drop(columns='Time (ms)').min().to_frame().T
+                except:
+                    minsd=columnsException
+                    
+                maxsd.columns = ["maxsd_" + str(col) for col in maxsd.columns]
+                row = row.join(maxsd)
+                minsd.columns = ["minsd_" + str(col) for col in minsd.columns]
+                row = row.join(minsd)
+                
+                
+                try:
+                    maxsr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').max().to_frame().T
+                except:
+                    maxsr=columnsException
+                
+                try:
+                    minsr = result['popfreqs'][result['popfreqs']['Time (ms)'].between(row.loc[0,'stimulusstarttime'], row.loc[0,'rewardtime'])].drop(columns='Time (ms)').min().to_frame().T
+                except:
+                    minsr=columnsException
+                    
+                maxsr.columns = ["maxsr_" + str(col) for col in maxsr.columns]
+                row = row.join(maxsr)
+                minsr.columns = ["minsr_" + str(col) for col in minsr.columns]
+                row = row.join(minsr)
                 
                 
                 datatable = datatable.append(row)

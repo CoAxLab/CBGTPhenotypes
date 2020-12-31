@@ -676,8 +676,8 @@ def getConEff(**kwargs):
                           'D2STR_syn': .28,
                           'GPeP': 1.65},
                 'FSI':  {'FSI': 1.15,
-                        'D1STR': 1.01*.8,
-                        'D2STR': 1.01*.8},
+                        'D1STR': 1.23*.8,
+                        'D2STR': 1.23*.8},
                 'GPeP': {'GPeP': 1.5,
                         'STN': 0.4,
                         'GPi': 0.012},
@@ -840,7 +840,7 @@ def describeBG(**kwargs):
     GPeP = makePop("GPeP", [[GABA, 2000, 2, 2],
                 [AMPA, 800, config['GPeExtEff'],
                 config['GPeExtFreq']], NMDA],
-                cd_pre, {'N': 2500, 'g_T': 0.06}) # 'Taum':10 SOLVE IT!!!!!!! taum=C/gL*1000 (1000 is to change units (to nS according to PLOS paper)
+                cd_pre, {'N': 2500, 'g_T': 0.06, 'taum':10, 'g_L': 30}) % SOLVE IT!!!!!!!!!!! >25
     camP(c, 'GPeP', 'GPeP', 'GABA', ['all'], conProb['GPeP']['GPeP'], conEff['GPeP']['GPeP'])
     camP(c, 'GPeP', 'STNE', 'GABA', ['syn'], conProb['GPeP']['STN'], conEff['GPeP']['STN'])
     camP(c, 'GPeP', 'GPi', 'GABA', ['syn'], conProb['GPeP']['GPi'], conEff['GPeP']['GPi'])
@@ -856,13 +856,13 @@ def describeBG(**kwargs):
 
     GPi = makePop("GPi", [GABA,
                         [AMPA, 800, config['GPiExtEff'],
-                        config['GPiExtFreq']], NMDA], cd_pre) # {'Taum':7}
+                        config['GPiExtFreq']], NMDA], cd_pre) % SOLVE IT!!!!!!!!, {NEW STAFF IF NEEDED}
     camP(c, 'GPi', 'Th', 'GABA', ['syn'], conProb['GPi']['Th'], conEff['GPi']['Th'])
 
 
     Th = makePop('Th', [GABA,
                         [AMPA, 800, config['ThExtEff'],
-                        config['ThExtFreq']], NMDA], cd_pre, {'Taum': 27.78}) # SOLVE IT to have the Th baseline upper we increase Taum!!!!
+                        config['ThExtFreq']], NMDA], cd_pre)
     camP(c, 'Th', 'D1STR', 'AMPA', ['syn'], conProb['Th']['STRd'], conEff['Th']['STRd'])
     camP(c, 'Th', 'D2STR', 'AMPA', ['syn'], conProb['Th']['STRi'], conEff['Th']['STRi'])
     camP(c, 'Th', 'FSI', 'AMPA', ['all'], conProb['Th']['FSI'], conEff['Th']['FSI'])
@@ -904,15 +904,13 @@ def mcInfo(**kwargs):
               'Choices': 2,
               'Dynamic': 30,
               't1_epochs':{'r':[]},
-              't2_epochs':{'r':[]},
-              'SustainedFraction': 0.85,
-              }
+              't2_epochs':{'r':[]}}
 
     (config['t1_epochs']['r'],config['t2_epochs']['r']) = genDefaultRewardSchedule()
 
     config.update(kwargs)
     
-    t1_epochs = config['t1_epochs']['r']
+    t1_epochs = config['t1_epochs']['r']	
     t2_epochs = config['t2_epochs']['r']
 
     dims = {'brain': 1, 'choices': config['Choices']}
@@ -929,7 +927,7 @@ def mcInfo(**kwargs):
     hes = []
     houts = []
     for i in range(0,len(t1_epochs)):
-        hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim'] + (config['WrongStim']-config['BaseStim'])*config['SustainedFraction']))
+        hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim']*.15+config['WrongStim']*.85))
         hes.append(makeHandleEvent('reset', 0, 'sensory', [], config['BaseStim']))
         hes.append(makeHandleEvent('wrong stimulus', config['Start'], 'sensory', [], config['WrongStim']))
         hes.append(makeHandleEvent('right stimulus', config['Start'], 'sensory', [0], config['RightStim']))
